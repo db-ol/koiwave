@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 20px;
+        }
+
+        .banner {
+            background-color: #f3f4f6;
+            color: #333;
+            text-align: center;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        .section {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .section-header {
+            background: #f7f7f7;
+            padding: 10px;
+            font-weight: bold;
+            color: #333;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header span {
+            font-size: 1.2em;
+            color: #007bff;
+        }
+
+        .section-content {
+            display: none;
+            padding: 15px;
+        }
+
+        .order-item {
+            display: grid;
+            grid-template-columns: auto 1fr auto;
+            padding: 10px 0;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .order-item span:last-child {
+            text-align: right;
+        }
+
+        .order-total {
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-top: 2px solid #000;
+        }
+
+        .payment-method {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .payment-method input[type="radio"] {
+            margin-right: 10px;
+        }
+
+        .card-details {
+            display: none;
+            flex-direction: column;
+        }
+
+        .card-details input {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1em;
+        }
+
+        .terms {
+            display: flex;
+            align-items: center;
+            font-size: 0.9em;
+            color: #333;
+            margin-top: 10px;
+        }
+
+        .terms input {
+            margin-right: 10px;
+        }
+
+        .pay-button {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            color: #fff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+
+        .pay-button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Mock Payment Banner -->
+        <div class="banner">This is just a mock payment page. No real payment will be processed.</div>
+
+        <h1>Checkout</h1>
+
+        <!-- Order Summary Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('orderSummary', this)">
+                <span>Order Summary</span>
+                <span>-</span> <!-- Change default icon to "-" -->
+            </div>
+            <div class="section-content" id="orderSummary" style="display: block;"> <!-- Set display to block -->
+                <div class="order-details">
+                    <h3>Items:</h3>
+                    {% for item in order_data['items'] %}
+                    <div class="order-item">
+                        <span>{{ item.quantity }} x {{ item.item_name_english }}</span>
+                        <span>${{ item.item_total_price | round(2) }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-total">
+                    <span>Subtotal:</span>
+                    <span>${{ order_data['subtotal'] | round(2) }}</span>
+                </div>
+                <div class="order-total">
+                    <span>Tax:</span>
+                    <span>${{ order_data['tax'] | round(2) }}</span>
+                </div>
+                <div class="order-total">
+                    <span>Total:</span>
+                    <span>${{ order_data['total'] | round(2) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Method Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('paymentMethod', this)">
+                <span>Payment Method</span>
+                <span>-</span> <!-- Change default icon to "-" -->
+            </div>
+            <div class="section-content" id="paymentMethod" style="display: block;"> <!-- Set display to block -->
+                <form id="paymentForm" action="/pay/{{ order_id }}" method="post">
+                    <label class="payment-method">
+                        <input type="radio" name="payment_method" id="cardOption" required>
+                        <span>Pay with Card</span>
+                        <img src="/static/images/visa_mastercard_logo.png" alt="Visa and MasterCard Logos" style="height: 20px;">
+                    </label>
+                    <div class="card-details" id="cardDetails">
+                        <input type="text" name="card_number" placeholder="Card Number" required maxlength="19" id="cardNumberInput">
+                        <input type="text" name="expiry_date" placeholder="MM/YY" required maxlength="5" id="expiryDateInput">
+                        <input type="text" name="cvv" placeholder="CVV" required maxlength="3">
+                    </div>
+                    <div class="terms">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I agree to the <a href="#">Terms & Conditions</a></label>
+                    </div>
+                    <button class="pay-button" type="submit" id="payButton" disabled>Pay Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Toggle visibility of section content and update +/-
+        function toggleSection(sectionId, headerElement) {
+            const sectionContent = document.getElementById(sectionId);
+            const isHidden = sectionContent.style.display === "none" || sectionContent.style.display === "";
+            sectionContent.style.display = isHidden ? "block" : "none";
+            headerElement.querySelector('span:last-child').textContent = isHidden ? "-" : "+";
+        }
+
+        const cardOption = document.getElementById('cardOption');
+        const cardDetails = document.getElementById('cardDetails');
+        const termsCheckbox = document.getElementById('terms');
+        const payButton = document.getElementById('payButton');
+
+        const cardNumberInput = document.getElementById('cardNumberInput');
+        const expiryDateInput = document.getElementById('expiryDateInput');
+
+        // Format card number input with spaces every 4 digits
+        cardNumberInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            value = value.match(/.{1,4}/g)?.join(' ') || '';
+            e.target.value = value;
+        });
+
+        // Format expiry date input with "/" after the month
+        expiryDateInput.addEventListener('input', (e) => {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length > 2) value = value.slice(0, 2) + '/' + value.slice(2, 4);
+            e.target.value = value;
+        });
+
+        // Show card details when "Pay with Card" is selected
+        cardOption.addEventListener('change', () => {
+            cardDetails.style.display = cardOption.checked ? "flex" : "none";
+            validateForm();
+        });
+
+        // Enable Pay button when all conditions are met
+        termsCheckbox.addEventListener('change', validateForm);
+        cardDetails.addEventListener('input', validateForm);
+
+        function validateForm() {
+            const isTermsChecked = termsCheckbox.checked;
+            const isCardSelected = cardOption.checked;
+            const isCardDetailsFilled = Array.from(cardDetails.querySelectorAll('input')).every(input => input.value.trim() !== '');
+
+            payButton.disabled = !(isTermsChecked && isCardSelected && isCardDetailsFilled);
+        }
+    </script>
+</body>
+</html>

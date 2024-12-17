@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Summary</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f9f9f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        /* Order Summary Styles */
+        .order-summary {
+            text-align: left;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .order-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .order-details h3 {
+            margin-top: 0;
+            font-size: 1.2em;
+            color: #555;
+        }
+
+        .order-item {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            padding: 10px 0;
+            border-bottom: 1px solid #eaeaea;
+            font-size: 0.95em;
+            align-items: center;
+        }
+
+        .item-name {
+            font-weight: bold;
+            margin-left: 10px;
+            color: #333;
+        }
+
+        .item-price {
+            text-align: right;
+            color: #333;
+            font-weight: bold;
+        }
+
+        .item-quantity {
+            font-size: 0.9em;
+            color: #888;
+        }
+
+        .order-total {
+            font-weight: bold;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            padding: 10px 0;
+            border-top: 2px solid #333;
+            font-size: 1.1em;
+            color: #333;
+        }
+
+        .order-total span {
+            text-align: right;
+        }
+
+        .highlight {
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Order Summary</h1>
+
+        <div class="order-summary">
+            <div class="order-details">
+                <h3>Items:</h3>
+                {% for item in order_data['items'] %}
+                <div class="order-item">
+                    <div>
+                        <span class="item-quantity">{{ item.quantity }} x</span>
+                        <span class="item-name">{{ item.item_name_chinese }} ({{ item.item_name_english }})</span>
+                    </div>
+                    <div class="item-price">${{ item.item_total_price | round(2) }}</div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="order-total">
+                <div>Subtotal</div>
+                <div>${{ order_data['subtotal'] | round(2) }}</div>
+            </div>
+
+            <div class="order-total">
+                <div>Tax</div>
+                <div>${{ order_data['tax'] | round(2) }}</div>
+            </div>
+
+            <div class="order-total highlight">
+                <div>Total</div>
+                <div>${{ order_data['total'] | round(2) }}</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
